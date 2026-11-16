@@ -8,7 +8,9 @@ import java.net.URL;
 
 @Service
 public class APIService {
-    private static final String HUGGINGFACE_API_KEY = "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";
+    // Read the key from the environment, never hard-code it:
+    //   export HUGGINGFACE_API_KEY=hf_...
+    private static final String HUGGINGFACE_API_KEY = System.getenv("HUGGINGFACE_API_KEY");
     private static final String MODEL_URL = "https://api-inference.huggingface.co/models/distilbert-base-uncased-distilled-squad";
 
     public String queryModel(String question, String context) throws Exception {
