@@ -19,6 +19,22 @@ public final class DpGreedyEasy {
     // Trick: ways[i] = ways[i−1] + ways[i−2]  ·  O(n)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * There are n steps, and each move climbs 1 or 2 of them. How many
+     * different ways are there to reach the top?
+     *
+     * EXAMPLE
+     *   n = 3  ->  3      (1+1+1, 1+2, 2+1)
+     *   n = 5  ->  8
+     *
+     * STEP 1 · BRUTE FORCE
+     * Write the rule directly as recursion: ways(n) = ways(n−1) + ways(n−2).
+     *
+     * Brute force cost: O(2ⁿ) time, because ways(n−2) is recomputed over and
+     * over. n = 45 takes seconds. Storing each answer once (Step 2) makes it
+     * O(n). That is the whole idea of DP.
+     */
     // Step 1 · brute force
     public static class ClimbingStairsRecursive {
         public int climbStairs(int n) {
@@ -28,6 +44,16 @@ public final class DpGreedyEasy {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * To stand on step i, your last move came either from step i−1 (a 1-step)
+     * or from step i−2 (a 2-step). So ways[i] = ways[i−1] + ways[i−2]. That's
+     * the Fibonacci sequence.
+     *
+     * DRY RUN
+     *   step i | 1 | 2 | 3 | 4 | 5
+     *   ways[i] | 1 | 2 | 1+2 = 3 | 2+3 = 5 | 3+5 = 8
+     */
     // Step 2 · the better way
     public static class ClimbingStairs {
         public int climbStairs(int n) {
@@ -43,12 +69,40 @@ public final class DpGreedyEasy {
         }
     }
 
+    /*
+     * Time: O(n) · Space: O(n)
+     *
+     * WATCH OUT
+     * - Return early for n ≤ 2. For n = 1 the array has size 2, so writing
+     *   ways[2] would crash.
+     *
+     * IF THEY ASK FOR O(1) SPACE
+     * You only ever need the last two values, so keep two variables, prev2
+     * and prev1, and slide them forward instead of keeping the whole array.
+     */
+
     // ====================================================================
     // 2. Min Cost Climbing Stairs
     // LeetCode 746 · Easy
     // Trick: best[i] = min(best[i−1] + cost[i−1], best[i−2] + cost[i−2])  ·  O(n)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * cost[i] is the price of standing on step i. You can start on step 0 or
+     * step 1, and each move climbs 1 or 2 steps. What's the cheapest way to
+     * get past the last step?
+     *
+     * EXAMPLE
+     *   [10, 15, 20]  ->  15     (start on step 1, pay 15, jump 2 to the top)
+     *
+     * STEP 1 · BRUTE FORCE
+     * Use recursion. From step i you pay cost[i], then take the cheaper of
+     * jumping 1 or 2 steps.
+     *
+     * Brute force cost: O(2ⁿ), because the same steps are solved again and
+     * again.
+     */
     // Step 1 · brute force
     public static class MinCostStairsRecursive {
         public int minCostClimbingStairs(int[] cost) {
@@ -62,6 +116,17 @@ public final class DpGreedyEasy {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Let best[i] = the cheapest cost to arrive on step i, where the top is
+     * step n. You arrive at i either from i − 1 (paying cost[i−1]) or from i
+     * − 2 (paying cost[i−2]). Steps 0 and 1 are free starting points.
+     *
+     * DRY RUN ([10, 15, 20])
+     *   best[0] = 0, best[1] = 0
+     *   best[2] = min(0 + 10, 0 + 15) = 10
+     *   best[3] = min(10 + 20, 0 + 15) = 15   <- the top
+     */
     // Step 2 · the better way
     public static class MinCostStairs {
         public int minCostClimbingStairs(int[] cost) {
@@ -78,12 +143,30 @@ public final class DpGreedyEasy {
         }
     }
 
+    /*
+     * Time: O(n) · Space: O(n) (O(1) with two variables)
+     */
+
     // ====================================================================
     // 3. Best Time to Buy and Sell Stock
     // LeetCode 121 · greedy · Easy
     // Trick: keep cheapest so far; profit = price − cheapest  ·  O(n)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * prices[i] is the price on day i. Buy once, then sell once on a later
+     * day. Return the biggest profit, or 0 if no profit is possible.
+     *
+     * EXAMPLE
+     *   [7, 1, 5, 3, 6, 4]  ->  5      (buy at 1, sell at 6)
+     *   [7, 6, 4, 3, 1]     ->  0      (prices only fall)
+     *
+     * STEP 1 · BRUTE FORCE
+     * Try every buy day with every later sell day.
+     *
+     * Brute force cost: O(n²) time · O(1) space
+     */
     // Step 1 · brute force
     public static class StockBrute {
         public int maxProfit(int[] prices) {
@@ -97,6 +180,21 @@ public final class DpGreedyEasy {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Go through the days once, keeping the cheapest price so far. On each
+     * day, imagine selling today: the profit would be price − cheapest. Keep
+     * the best profit you've seen.
+     *
+     * DRY RUN
+     *   day | price | cheapest so far | profit if sold today | best
+     *   0 | 7 | 7 | 0 | 0
+     *   1 | 1 | 1 | 0 | 0
+     *   2 | 5 | 1 | 4 | 4
+     *   3 | 3 | 1 | 2 | 4
+     *   4 | 6 | 1 | 5 | 5
+     *   5 | 4 | 1 | 3 | 5
+     */
     // Step 2 · the better way
     public static class BestTimeToBuySell {
         public int maxProfit(int[] prices) {
@@ -110,12 +208,37 @@ public final class DpGreedyEasy {
         }
     }
 
+    /*
+     * Time: O(n) · Space: O(1)
+     *
+     * WATCH OUT
+     * - Update cheapest before working out the profit. Selling on the buy day
+     *   then gives 0, never a negative number.
+     * - "Cheapest so far" only looks at earlier days, so you can never sell
+     *   before you buy.
+     */
+
     // ====================================================================
     // 4. Assign Cookies
     // LeetCode 455 · greedy · Easy
     // Trick: sort both; give the smallest cookie that satisfies the least greedy child  ·  O(n log n)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Child i is happy with a cookie of size at least greed[i]. Each child
+     * gets at most one cookie. How many children can you make happy?
+     *
+     * EXAMPLE
+     *   greed [1, 2, 3], cookies [1, 1]      ->  1
+     *   greed [1, 2],    cookies [1, 2, 3]   ->  2
+     *
+     * STEP 1 · BRUTE FORCE
+     * Go through the children from least greedy to most greedy. For each one,
+     * scan all the cookies for the smallest unused cookie that's big enough.
+     *
+     * Brute force cost: O(n × m) time
+     */
     // Step 1 · brute force
     public static class AssignCookiesScan {
         public int findContentChildren(int[] greed, int[] cookies) {
@@ -140,6 +263,13 @@ public final class DpGreedyEasy {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Sort both lists, then walk them with two pointers. If the current
+     * cookie satisfies the current child, both move on. If it's too small, it
+     * can't satisfy anyone greedier either, so throw it away and try the next
+     * cookie.
+     */
     // Step 2 · the better way
     public static class AssignCookies {
         public int findContentChildren(int[] greed, int[] cookies) {
@@ -156,5 +286,13 @@ public final class DpGreedyEasy {
             return child;
         }
     }
+
+    /*
+     * Time: O(n log n + m log m) · Space: O(n + m) for the sorted copies
+     *
+     * WHY GREEDY IS SAFE HERE
+     * Using the smallest cookie that works never hurts, because bigger
+     * cookies stay available for greedier children.
+     */
 
 }

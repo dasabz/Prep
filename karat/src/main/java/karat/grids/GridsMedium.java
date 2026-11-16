@@ -19,6 +19,23 @@ public final class GridsMedium {
     // Trick: four shrinking walls: top, bottom, left, right  ·  O(R × C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Return every element of the matrix in clockwise spiral order, starting
+     * at the top-left.
+     *
+     * EXAMPLE
+     *    1  2  3  4
+     *    5  6  7  8      ->  1 2 3 4 8 12 11 10 9 5 6 7
+     *    9 10 11 12
+     *
+     * STEP 1 · BRUTE FORCE
+     * Walk like a robot. Move in the current direction (right, down, left,
+     * up), and when the next cell is outside the grid or already visited,
+     * turn right. A seen grid remembers the visited cells.
+     *
+     * Brute force cost: O(R × C) time, plus O(R × C) extra space for seen.
+     */
     // Step 1 · brute force
     public static class SpiralVisited {
         public List<Integer> spiralOrder(int[][] m) {
@@ -45,6 +62,20 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Keep four walls: top, bottom, left, right. Go along the top row and
+     * then move top down; go down the right column and move right in; go back
+     * along the bottom row and move bottom up; go up the left column and move
+     * left in. Repeat until the walls cross. No seen grid needed.
+     *
+     * DRY RUN (3 × 4 EXAMPLE)
+     *   top row 0, cols 0..3      -> 1 2 3 4        top = 1
+     *   right col 3, rows 1..2    -> 8 12           right = 2
+     *   bottom row 2, cols 2..0   -> 11 10 9        bottom = 1
+     *   left col 0, rows 1..1     -> 5              left = 1
+     *   top row 1, cols 1..2      -> 6 7            top = 2 > bottom -> stop
+     */
     // Step 2 · the better way
     public static class Spiral {
         public List<Integer> spiralOrder(int[][] m) {
@@ -71,12 +102,36 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(R × C) · Space: O(1) extra
+     *
+     * WATCH OUT
+     * - The two if checks inside the loop matter. Without them, a single
+     *   remaining row or column gets printed twice. Test a 3 × 1 matrix.
+     */
+
     // ====================================================================
     // 2. Rotate Image
     // LeetCode 48 · Medium
     // Trick: transpose, then reverse each row  ·  O(n²)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Rotate an n × n matrix 90° clockwise, in place.
+     *
+     * EXAMPLE
+     *   1 2 3        7 4 1
+     *   4 5 6   ->   8 5 2
+     *   7 8 9        9 6 3
+     *
+     * STEP 1 · BRUTE FORCE
+     * Fill a new matrix: the value at (r, c) moves to (c, n − 1 − r). Then
+     * copy it back.
+     *
+     * Brute force cost: O(n²) time but O(n²) extra space, and the problem
+     * says in place.
+     */
     // Step 1 · brute force
     public static class RotateCopy {
         public void rotate(int[][] m) {
@@ -95,6 +150,21 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * A 90° clockwise turn is two simple flips:
+     *
+     * 1. Transpose: swap m[r][c] with m[c][r] (mirror across the diagonal).
+     * 2. Reverse each row (mirror left to right).
+     *
+     * Both are just swaps, so no extra matrix is needed.
+     *
+     * DRY RUN
+     *   start        transpose     reverse rows
+     *   1 2 3        1 4 7         7 4 1
+     *   4 5 6   ->   2 5 8   ->    8 5 2
+     *   7 8 9        3 6 9         9 6 3
+     */
     // Step 2 · the better way
     public static class RotateInPlace {
         public void rotate(int[][] m) {
@@ -119,12 +189,36 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(n²) · Space: O(1)
+     *
+     * WATCH OUT
+     * - In the transpose, start the inner loop at c = r + 1. Starting at 0
+     *   swaps every pair twice and puts everything back where it was.
+     * - For counter-clockwise: transpose, then reverse each column instead.
+     */
+
     // ====================================================================
     // 3. Set Matrix Zeroes
     // LeetCode 73 · Medium
     // Trick: first remember zero rows/cols, then write  ·  O(R × C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * If a cell is 0, set its entire row and column to 0. Do it in place.
+     *
+     * EXAMPLE
+     *   1 1 1        1 0 1
+     *   1 0 1   ->   0 0 0
+     *   1 1 1        1 0 1
+     *
+     * STEP 1 · BRUTE FORCE
+     * Keep a copy of the original. For every 0 in the copy, zero out that
+     * whole row and column in the real matrix.
+     *
+     * Brute force cost: O(R × C × (R + C)) time and O(R × C) extra space.
+     */
     // Step 1 · brute force
     public static class SetZeroesCopy {
         public void setZeroes(int[][] m) {
@@ -141,6 +235,12 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Remember first, write later. One pass marks which rows and which
+     * columns contain a 0, in two boolean arrays. A second pass sets a cell
+     * to 0 if its row or its column is marked.
+     */
     // Step 2 · the better way
     public static class SetZeroes {
         public void setZeroes(int[][] m) {
@@ -163,12 +263,49 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(R × C) · Space: O(R + C)
+     *
+     * WATCH OUT
+     * - Never zero cells while you're still scanning. A 0 you just wrote
+     *   would look like an original 0 and wipe out more rows.
+     *
+     * IF THEY PUSH FOR O(1) SPACE
+     * Use the matrix's own first row and first column as the marker arrays,
+     * plus one extra boolean to remember whether the first column itself had
+     * a 0. It's the same idea with fiddlier bookkeeping. Say it; only code it
+     * if asked.
+     */
+
     // ====================================================================
     // 4. Game of Life
     // LeetCode 289 · Medium
     // Trick: in-place states: 2 = live→dead, 3 = dead→live  ·  O(R × C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Every cell is alive (1) or dead (0). All cells update at the same time,
+     * based on their 8 neighbours:
+     *
+     * - a live cell with fewer than 2 or more than 3 live neighbours dies;
+     * - a live cell with 2 or 3 live neighbours lives on;
+     * - a dead cell with exactly 3 live neighbours comes alive.
+     *
+     * Update the board in place.
+     *
+     * EXAMPLE
+     *   0 1 0        0 0 0
+     *   0 0 1   ->   1 0 1
+     *   1 1 1        0 1 1
+     *   0 0 0        0 1 0
+     *
+     * STEP 1 · BRUTE FORCE
+     * Copy the board. Count neighbours on the old copy and write the results
+     * into the real board.
+     *
+     * Brute force cost: O(R × C) time · O(R × C) extra space
+     */
     // Step 1 · brute force
     public static class GameOfLifeCopy {
         public void gameOfLife(int[][] board) {
@@ -202,6 +339,17 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Avoid the copy by using two extra states that remember both the old and
+     * the new value:
+     *
+     * - 2 = was alive, now dead
+     * - 3 = was dead, now alive
+     *
+     * When counting neighbours, treat 1 and 2 as "was alive". After the pass,
+     * turn 2 into 0 and 3 into 1.
+     */
     // Step 2 · the better way
     public static class GameOfLife {
         // in place.  2 = was alive, now dead.   3 = was dead, now alive.
@@ -241,12 +389,53 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(R × C) · Space: O(1)
+     *
+     * WATCH OUT
+     * - The update is simultaneous. If you write plain 0/1 while scanning,
+     *   later cells see the new values and the result is wrong. That's the
+     *   whole point of the copy or the extra states.
+     *
+     * KARAT ANGLE
+     * "Simulate one step of a grid with neighbour rules" is a classic warm-
+     * up. Write a small countNeighbours helper first; follow-up parts usually
+     * change only the rules.
+     */
+
     // ====================================================================
     // 5. Number of Islands
     // LeetCode 200 · Medium
     // Trick: on a '1': count++ then sink the whole island  ·  O(R·C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * In a grid of '1' (land) and '0' (water), count the islands: groups of
+     * land connected up, down, left or right.
+     *
+     * EXAMPLE
+     *   1 1 0 0 0
+     *   1 1 0 0 0     ->  3 islands
+     *   0 0 1 0 0
+     *   0 0 0 1 1
+     *
+     * STEP 1 · BRUTE FORCE
+     * Scanning every cell plus one DFS per island already touches each cell a
+     * constant number of times, so it is the efficient answer. Alternatives
+     * (BFS, Union-Find) have the same cost.
+     *
+     * STEP 2 · THE IDEA
+     * Scan every cell. When you hit a '1', you've found a new island: add 1
+     * to count, then sink the whole island with DFS (turn its 1s into 0s) so
+     * its other cells don't get counted again.
+     *
+     * DRY RUN
+     *   (0,0) is 1  ->  count = 1, sink {(0,0),(0,1),(1,0),(1,1)}
+     *   (2,2) is 1  ->  count = 2, sink {(2,2)}
+     *   (3,3) is 1  ->  count = 3, sink {(3,3),(3,4)}
+     *   every other cell is now 0
+     */
     // Step 2 · the better way
     public static class NumberOfIslands {
         public int numIslands(char[][] grid) {
@@ -273,12 +462,45 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(rows × cols), since each cell is sunk at most once · Space:
+     * O(rows × cols) recursion
+     *
+     * WATCH OUT
+     * - Diagonal cells are not connected unless the problem says so.
+     * - If you're not allowed to change the input, use a separate boolean[][]
+     *   seen.
+     *
+     * KARAT LINK
+     * This is the engine behind Find Rectangles Part 3 (problem 19): same
+     * scan and same DFS, but you collect the cells instead of counting them.
+     */
+
     // ====================================================================
     // 6. Max Area of Island
     // LeetCode 695 · Medium
     // Trick: sink() returns the size: 1 + four recursive calls  ·  O(R × C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Return the size of the largest island of 1s (connected
+     * up/down/left/right), or 0 if there's none.
+     *
+     * EXAMPLE
+     *   1 1 0 0 0
+     *   1 1 0 0 0
+     *   0 0 0 1 1      ->  5
+     *   0 0 0 1 1
+     *   0 0 0 0 1
+     *
+     * STEP 1 · BRUTE FORCE
+     * From every land cell, flood its island with a fresh seen grid and
+     * measure it. The same island gets re-measured once for each of its
+     * cells.
+     *
+     * Brute force cost: O((R × C)²) time in the worst case
+     */
     // Step 1 · brute force
     public static class MaxAreaBrute {
         public int maxAreaOfIsland(int[][] grid) {
@@ -305,6 +527,12 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * It's Number of Islands with one change: make sink return the size of
+     * what it erased, as 1 + sink(down) + sink(up) + sink(right) +
+     * sink(left). Each cell is erased once, so it's counted once.
+     */
     // Step 2 · the better way
     public static class MaxAreaIsland {
         public int maxAreaOfIsland(int[][] grid) {
@@ -329,12 +557,32 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(R × C) · Space: O(R × C) recursion
+     */
+
     // ====================================================================
     // 7. Number of Enclaves
     // LeetCode 1020 · Medium
     // Trick: sink everything connected to the border; count what's left  ·  O(R × C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Count the land cells (1s) that can't walk off the grid: no path of land
+     * cells connects them to the border.
+     *
+     * EXAMPLE
+     *   0 0 0 0
+     *   1 0 1 0      ->  3      (the 1 at the left edge escapes; the other three are trapped)
+     *   0 1 1 0
+     *   0 0 0 0
+     *
+     * STEP 1 · BRUTE FORCE
+     * From each land cell, run a BFS and ask whether it can reach the border.
+     *
+     * Brute force cost: O((R × C)²) time
+     */
     // Step 1 · brute force
     public static class EnclavesBrute {
         public int numEnclaves(int[][] grid) {
@@ -373,6 +621,12 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Flip the question. Instead of asking "can this cell escape?" for every
+     * cell, start from the border and sink every land cell you can reach from
+     * it. Whatever land is left is trapped, so just count it.
+     */
     // Step 2 · the better way
     public static class Enclaves {
         public int numEnclaves(int[][] grid) {
@@ -407,12 +661,47 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(R × C) · Space: O(R × C) recursion
+     *
+     * PATTERN: WORK FROM THE BORDER INWARD
+     * "Which cells can reach the edge?" is almost always solved by starting
+     * at the edge. The next two problems (Surrounded Regions, Pacific
+     * Atlantic) use the same trick.
+     */
+
     // ====================================================================
     // 8. Surrounded Regions
     // LeetCode 130 · Medium
     // Trick: mark border-linked 'O' as safe; flip the rest  ·  O(R × C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * In a board of 'X' and 'O', flip every region of 'O' that is completely
+     * surrounded by 'X' to 'X'. An 'O' region that touches the border is
+     * safe.
+     *
+     * EXAMPLE
+     *   X X X X        X X X X
+     *   X O O X   ->   X X X X
+     *   X X O X        X X X X
+     *   X O X X        X O X X     (bottom O touches the border: safe)
+     *
+     * STEP 1 · BRUTE FORCE
+     * For each 'O' region, BFS it and check whether any cell touches the
+     * border; flip it if none does. With a shared visited array this is O(R ×
+     * C) but awkward: you have to collect each region before deciding. Step 2
+     * is simpler.
+     *
+     * STEP 2 · THE IDEA
+     * Work from the border inward, like Number of Enclaves:
+     *
+     * 1. DFS from every border 'O' and mark everything it reaches as safe
+     *    ('S').
+     * 2. Sweep the board: any 'O' still left is surrounded, so make it 'X'.
+     *    Every 'S' goes back to 'O'.
+     */
     // Step 2 · the better way
     public static class SurroundedRegions {
         public void solve(char[][] board) {
@@ -446,12 +735,39 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(R × C) · Space: O(R × C) recursion
+     *
+     * WATCH OUT
+     * - The temporary 'S' marker is what keeps the DFS from looping forever.
+     *   It changes the cell so the != 'O' check stops it.
+     */
+
     // ====================================================================
     // 9. Pacific Atlantic Water Flow
     // LeetCode 417 · Medium
     // Trick: climb UPHILL from each ocean; answer = cells reached by both  ·  O(R × C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Water flows from a cell to a neighbour whose height is less than or
+     * equal to it. The Pacific touches the top and left edges; the Atlantic
+     * touches the bottom and right edges. Return every cell from which water
+     * can reach both oceans.
+     *
+     * EXAMPLE
+     *   heights:      answer cells (row, col):
+     *   1 2 3         (0,2) (1,0) (1,1) (1,2)
+     *   8 9 4         (2,0) (2,1) (2,2)
+     *   7 6 5
+     *
+     * STEP 1 · BRUTE FORCE
+     * From every cell, let water run downhill with DFS and note which ocean
+     * edges it touches.
+     *
+     * Brute force cost: O((R × C)²) time
+     */
     // Step 1 · brute force
     public static class PacificAtlanticBrute {
         public List<List<Integer>> pacificAtlantic(int[][] h) {
@@ -485,6 +801,13 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Reverse the flow. Start at each ocean and walk uphill (to neighbours
+     * that are greater than or equal). Every cell you reach could send water
+     * back down to that ocean. Do it once from the Pacific edges and once
+     * from the Atlantic edges; the answer is the cells marked in both.
+     */
     // Step 2 · the better way
     public static class PacificAtlantic {
         public List<List<Integer>> pacificAtlantic(int[][] h) {
@@ -525,12 +848,40 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(R × C) · Space: O(R × C)
+     *
+     * WATCH OUT
+     * - When walking backwards the comparison flips: you move to h[next] >=
+     *   h[current].
+     * - Corner cells touch both oceans: (0, last column) and (last row, 0).
+     */
+
     // ====================================================================
     // 10. Rotting Oranges
     // LeetCode 994 · Medium
     // Trick: all rotten in queue first; one BFS level = 1 minute  ·  O(R·C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * 0 = empty, 1 = fresh orange, 2 = rotten orange. Every minute, each
+     * rotten orange rots its fresh neighbours (up/down/left/right). How many
+     * minutes until no fresh orange is left? Return −1 if some can never rot.
+     *
+     * EXAMPLE
+     *   2 1 1
+     *   1 1 0     ->  4 minutes
+     *   0 1 1
+     *
+     * STEP 1 · BRUTE FORCE
+     * Simulate minute by minute. Each minute, scan the whole grid for fresh
+     * oranges next to a rotten one, rot them all at once, and repeat until
+     * nothing changes.
+     *
+     * Brute force cost: O((R × C)²) time in the worst case, since each minute
+     * rescans the whole grid. Step 2 only touches each orange once.
+     */
     // Step 1 · brute force
     public static class RottingSimulate {
         public int orangesRotting(int[][] grid) {
@@ -571,6 +922,19 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Use multi-source BFS. Put all the rotten oranges in the queue at the
+     * start, then process the queue one level at a time: one level is one
+     * minute. Count the fresh oranges at the start and subtract 1 each time
+     * one rots. If any fresh ones are left at the end, return −1.
+     *
+     * DRY RUN (ONE GRID PER MINUTE)
+     *   min 0    min 1    min 2    min 3    min 4
+     *   2 1 1    2 2 1    2 2 2    2 2 2    2 2 2
+     *   1 1 0    2 1 0    2 2 0    2 2 0    2 2 0
+     *   0 1 1    0 1 1    0 1 1    0 2 1    0 2 2
+     */
     // Step 2 · the better way
     public static class RottingOranges {
         public int orangesRotting(int[][] grid) {
@@ -605,12 +969,39 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(rows × cols) · Space: O(rows × cols)
+     *
+     * WATCH OUT
+     * - Read int size = queue.size() before the inner loop. That freezes the
+     *   oranges for this minute, so ones added during the loop wait until the
+     *   next minute.
+     * - The loop condition fresh > 0 stops you counting one extra empty
+     *   minute at the end.
+     * - If there are no fresh oranges at the start, the answer is 0.
+     */
+
     // ====================================================================
     // 11. 01 Matrix
     // LeetCode 542 · Medium
     // Trick: multi-source BFS from ALL zeros at once  ·  O(R × C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * For every cell, return the distance (up/down/left/right steps) to the
+     * nearest 0.
+     *
+     * EXAMPLE
+     *   0 0 0        0 0 0
+     *   0 1 0   ->   0 1 0
+     *   1 1 1        1 2 1
+     *
+     * STEP 1 · BRUTE FORCE
+     * Run a separate BFS from every cell until it finds a 0.
+     *
+     * Brute force cost: O((R × C)²) time
+     */
     // Step 1 · brute force
     public static class ZeroOneMatrixBrute {
         public int[][] updateMatrix(int[][] mat) {
@@ -648,6 +1039,18 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Turn it around, as with Rotting Oranges: put every 0 into the queue at
+     * the start with distance 0. BFS then spreads outward one layer at a
+     * time, and the first time it reaches a cell is that cell's shortest
+     * distance. Mark unknown cells as −1 so each is set only once.
+     *
+     * DRY RUN (EXAMPLE)
+     *   start queue: all 5 zeros
+     *   layer 1: (1,1), (2,0), (2,2) get 1
+     *   layer 2: (2,1) gets 2  (its neighbours (1,1)/(2,0)/(2,2) are 1)
+     */
     // Step 2 · the better way
     public static class ZeroOneMatrix {
         public int[][] updateMatrix(int[][] mat) {
@@ -679,12 +1082,39 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(R × C) · Space: O(R × C)
+     *
+     * PATTERN
+     * "Distance from the nearest X" means multi-source BFS: start from all
+     * the X's together.
+     */
+
     // ====================================================================
     // 12. Shortest Path in Binary Matrix
     // LeetCode 1091 · Medium
     // Trick: BFS; store length in queue; mark when adding  ·  O(n²)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * In an n×n grid, 0 is open and 1 is blocked. Find the shortest path from
+     * the top-left to the bottom-right, moving in 8 directions (diagonals
+     * included). The path length is the number of cells on it. Return −1 if
+     * there's no path.
+     *
+     * EXAMPLE
+     *   0 0 0
+     *   1 1 0     ->  4      path: (0,0) (0,1) (1,2) (2,2)
+     *   1 1 0
+     *
+     * STEP 1 · BRUTE FORCE
+     * Use DFS to try every possible path, backtracking as you go, and
+     * remember the shortest one that reaches the target.
+     *
+     * Brute force cost: exponential time. Fine on a 3×3 grid and hopeless on
+     * 50×50. This is exactly why "shortest" means BFS.
+     */
     // Step 1 · brute force
     public static class ShortestPathDFS {
         private int best;
@@ -719,6 +1149,20 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * "Shortest" on a grid with no weights means BFS. BFS explores in rings:
+     * every cell 1 step away, then every cell 2 steps away, and so on. The
+     * first time you reach the target is the shortest way there. Store the
+     * path length with each cell in the queue.
+     *
+     * DRY RUN
+     *   pop (0,0,len 1) -> open neighbours: (0,1)      -> add with len 2
+     *   pop (0,1,len 2) -> (0,2), (1,2)                -> add with len 3
+     *   pop (0,2,len 3) -> (1,2) already marked        -> nothing new
+     *   pop (1,2,len 3) -> (2,2)                       -> add with len 4
+     *   pop (2,2,len 4) -> it's the target             -> return 4
+     */
     // Step 2 · the better way
     public static class ShortestPathBinaryMatrix {
         public int shortestPathBinaryMatrix(int[][] grid) {
@@ -748,12 +1192,43 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(n²) · Space: O(n²)
+     *
+     * WATCH OUT
+     * - Mark a cell visited when you add it to the queue, not when you pop
+     *   it. Otherwise the same cell gets added many times.
+     * - Check the start and end cells first. If either is 1, return −1.
+     * - For 8 directions, two loops over −1..1 save you typing an 8-row
+     *   array.
+     */
+
     // ====================================================================
     // 13. Nearest Exit from Entrance in Maze
     // LeetCode 1926 · Medium
     // Trick: BFS from the entrance; first border cell (≠ entrance) wins  ·  O(R × C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * In a maze of '.' (open) and '+' (wall), start at entrance. An exit is
+     * any open cell on the border, other than the entrance itself. Return the
+     * fewest steps to an exit, or −1.
+     *
+     * EXAMPLE
+     *   + + . +
+     *   . . . +       entrance (1,2)  ->  1     (step up to (0,2), a border cell)
+     *   + + + .
+     *
+     * STEP 1 · BRUTE FORCE
+     * DFS over every path, keeping the shortest. That's exponential. "Fewest
+     * steps" in a grid always means BFS, so go straight to Step 2.
+     *
+     * STEP 2 · THE IDEA
+     * Run a BFS from the entrance, storing the step count with each cell. The
+     * first border cell you discover is the nearest exit. Mark the entrance
+     * as visited first, so it's never counted as an exit.
+     */
     // Step 2 · the better way
     public static class NearestExit {
         public int nearestExit(char[][] maze, int[] entrance) {
@@ -782,12 +1257,51 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(R × C) · Space: O(R × C)
+     *
+     * WATCH OUT
+     * - Check for an exit when you discover a neighbour (step + 1), not when
+     *   you pop it. That saves a level and keeps the entrance from counting.
+     */
+
     // ====================================================================
     // 14. Word Search  ★ Karat
     // LeetCode 79 · Medium
     // Trick: mark '#', try 4 ways, restore the letter  ·  O(R·C·4^L)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Does the word appear in the grid as a chain of neighbouring cells
+     * (up/down/left/right)? A cell can't be used twice in the same word.
+     *
+     * EXAMPLE
+     *   C A T S
+     *   O D E X       "CODE" -> true     C(0,0) O(1,0) D(1,1) E(1,2)
+     *   P S A W       "COC"  -> false    (would have to reuse the C)
+     *
+     * STEP 1 · BRUTE FORCE
+     * Backtracking is the brute force here: you genuinely have to try the
+     * paths. The only speed-up is pruning. For example, before searching,
+     * check that the board has enough of each letter the word needs, and
+     * return false early if it doesn't.
+     *
+     * STEP 2 · THE IDEA
+     * Backtracking. Try every cell as a starting point. When a cell matches
+     * word[i], mark it as used ('#'), try all four neighbours for word[i+1],
+     * then put the letter back before returning so other paths can still use
+     * the cell.
+     *
+     * DRY RUN ("CODE")
+     *   start (0,0) 'C' matches i=0 -> mark '#'
+     *     down (1,0) 'O' matches i=1 -> mark
+     *       down (2,0) 'P'  no
+     *       up   (0,0) '#'  no (used)
+     *       right (1,1) 'D' matches i=2 -> mark
+     *         right (1,2) 'E' matches i=3 -> mark
+     *           next call: i = 4 = word length  ->  true
+     */
     // Step 2 · the better way
     public static class WordSearch {
         public boolean exist(char[][] board, String word) {
@@ -818,12 +1332,46 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(rows × cols × 4^L), L = word length · Space: O(L) recursion
+     *
+     * WATCH OUT
+     * - Restore the cell (b[r][c] = saved) on every path, including when
+     *   nothing was found.
+     * - Check i == word.length() before the bounds check. The last letter
+     *   might be on the edge, and the next call steps outside the grid.
+     *
+     * KARAT VERSION
+     * Karat usually wants the path back as a list of coordinates. Keep a List
+     * path: add (r, c) when you mark a cell and remove the last entry when
+     * you un-mark it. When i == word.length(), copy the path. Another common
+     * part: "Which words from this list are in the grid?" Call exist once for
+     * each word.
+     */
+
     // ====================================================================
     // 15. Subsets
     // LeetCode 78 · Medium
     // Trick: record every call; loop from start; add a copy  ·  O(n·2ⁿ)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Return every subset of a list of different numbers, including the empty
+     * one.
+     *
+     * EXAMPLE
+     *   [1, 2, 3]  ->  [], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]
+     *
+     * STEP 1 · BRUTE FORCE
+     * A direct, non-recursive way: every subset is a yes/no choice per
+     * number, which is exactly the bits of a number from 0 to 2ⁿ − 1. Bit i
+     * set means you take nums[i].
+     *
+     * Brute force cost: O(n × 2ⁿ), the same as Step 2, because every method
+     * has to produce all 2ⁿ subsets. Learn backtracking anyway: it extends to
+     * permutations and combinations, and bitmasks don't.
+     */
     // Step 1 · brute force
     public static class SubsetsBitmask {
         public List<List<Integer>> subsets(int[] nums) {
@@ -843,6 +1391,23 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * The backtracking template is choose → explore → un-choose. At every
+     * call, the current list is a valid subset, so record it. Then try adding
+     * each remaining number, only from start onwards. That stops you going
+     * backwards and creating duplicates like [2, 1].
+     *
+     * DRY RUN (THE RECURSION TREE)
+     *   []
+     *   ├── [1]
+     *   │   ├── [1,2]
+     *   │   │   └── [1,2,3]
+     *   │   └── [1,3]
+     *   ├── [2]
+     *   │   └── [2,3]
+     *   └── [3]
+     */
     // Step 2 · the better way
     public static class Subsets {
         public List<List<Integer>> subsets(int[] nums) {
@@ -862,12 +1427,50 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(n × 2ⁿ) · Space: O(n) recursion, plus the output
+     *
+     * WATCH OUT
+     * - Write result.add(new ArrayList<>(current)), which adds a copy. If you
+     *   add current itself, every entry points to the same list, and that
+     *   list is empty by the end.
+     *
+     * ONE TEMPLATE, MANY PROBLEMS
+     * - Permutations (46): use a boolean[] used array instead of start.
+     * - Combination Sum (39): a number may repeat, so recurse with i instead
+     *   of i + 1.
+     * - Letter Combinations (17): at depth d, loop over the letters of digit
+     *   d.
+     */
+
     // ====================================================================
     // 16. Permutations
     // LeetCode 46 · Medium
     // Trick: backtracking with a used[] array  ·  O(n × n!)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Return every ordering of a list of distinct numbers.
+     *
+     * EXAMPLE
+     *   [1, 2, 3]  ->  [1,2,3] [1,3,2] [2,1,3] [2,3,1] [3,1,2] [3,2,1]
+     *
+     * STEP 1 · BRUTE FORCE
+     * There are n! answers, so every method takes at least O(n × n!). No
+     * shortcut exists. The real choice is a clean way to generate them, which
+     * is the backtracking template.
+     *
+     * STEP 2 · THE IDEA
+     * Use the backtracking template from Subsets, with one change: any unused
+     * number can go next, not just the ones after start. Keep a boolean[]
+     * used, set it when you choose a number, and clear it when you un-choose.
+     *
+     * DRY RUN (TREE FOR [1, 2, 3], FIRST BRANCH)
+     *   [] -> [1] -> [1,2] -> [1,2,3] save
+     *             -> [1,3] -> [1,3,2] save
+     *      -> [2] -> ...
+     */
     // Step 2 · the better way
     public static class Permutations {
         public List<List<Integer>> permute(int[] nums) {
@@ -893,12 +1496,38 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(n × n!) · Space: O(n) recursion, plus the output
+     *
+     * WATCH OUT
+     * - Undo both changes on the way back: remove from cur and set used[i] =
+     *   false.
+     */
+
     // ====================================================================
     // 17. Combination Sum
     // LeetCode 39 · Medium
     // Trick: backtrack from start, reuse allowed (recurse with i); sort + break  ·  exponential
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Given distinct positive numbers, return every combination that adds up
+     * to target. A number may be used more than once. [2,2,3] and [3,2,2]
+     * count as the same combination.
+     *
+     * EXAMPLE
+     *   [2, 3, 6, 7], target 7   ->  [2,2,3], [7]
+     *   [2, 3, 5],    target 8   ->  [2,2,2,2], [2,3,3], [3,5]
+     *
+     * STEP 1 · BRUTE FORCE
+     * Backtrack: try each candidate from start onward, recurse with i (not i
+     * + 1) so it can be reused, and stop a branch once the remaining amount
+     * goes below 0.
+     *
+     * Brute force cost: exponential, and it keeps exploring candidates that
+     * are already too big.
+     */
     // Step 1 · brute force
     public static class CombinationSumBrute {
         public List<List<Integer>> combinationSum(int[] cand, int target) {
@@ -922,6 +1551,13 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Sort first, then prune. Once the candidates are in increasing order,
+     * the moment c[i] is bigger than what's left, every later candidate is
+     * bigger too, so you can break out of the whole loop instead of trying
+     * each one.
+     */
     // Step 2 · the better way
     public static class CombinationSum {
         public List<List<Integer>> combinationSum(int[] cand, int target) {
@@ -947,12 +1583,41 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: exponential in the worst case, but pruning cuts it hugely ·
+     * Space: O(target / smallest) recursion
+     *
+     * WATCH OUT
+     * - Recurse with i to allow reuse. Use i + 1 for the "each number once"
+     *   variant (Combination Sum II, LeetCode 40).
+     * - Starting the loop at start (not 0) is what prevents [2,3,2]-style
+     *   duplicates.
+     */
+
     // ====================================================================
     // 18. Letter Combinations of a Phone Number
     // LeetCode 17 · Medium
     // Trick: depth = digit index; loop over that digit's letters  ·  O(4ⁿ × n)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * Each digit 2–9 maps to letters as on a phone keypad. Return every
+     * letter string the digits could spell.
+     *
+     * EXAMPLE
+     *   "23"  ->  ad ae af bd be bf cd ce cf
+     *
+     * STEP 1 · BRUTE FORCE
+     * The output itself has up to 4ⁿ strings, so every method is at least
+     * that big. Backtracking is the clean way to produce them; an iterative
+     * "grow a list one digit at a time" version is the same cost.
+     *
+     * STEP 2 · THE IDEA
+     * Recursion depth i = which digit you're filling. At depth i, loop over
+     * that digit's letters: append one, recurse to i + 1, then remove it.
+     * When i equals the number of digits, save the string.
+     */
     // Step 2 · the better way
     public static class LetterCombinations {
         private static final String[] KEYS = {
@@ -980,12 +1645,49 @@ public final class GridsMedium {
         }
     }
 
+    /*
+     * Time: O(4ⁿ × n) · Space: O(n) recursion, plus the output
+     *
+     * WATCH OUT
+     * - Empty input returns an empty list, not [""].
+     */
+
     // ====================================================================
     // 19. Find Rectangles (3 parts)  ★ Karat
     // A Karat question asked in parts · Part 3 is Number of Islands · Medium
     // Trick: first unused 0 = top-left; walk right & down; mark  ·  O(R·C)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * An image is a grid of 1 (white) and 0 (black).
+     *
+     * - Part 1: there is exactly one rectangle of 0s. Return its top-left and
+     *   bottom-right corners.
+     * - Part 2: there can be several rectangles of 0s, and they never touch.
+     *   Return all of them.
+     * - Part 3: the black shapes can be any shape, not just rectangles.
+     *   Return the cells of each shape.
+     *
+     * EXAMPLE
+     *        c0 c1 c2 c3 c4 c5
+     *   r0    1  1  1  1  1  1
+     *   r1    1  0  0  1  1  1
+     *   r2    1  0  0  1  0  1
+     *   r3    1  1  1  1  0  1
+     *   r4    0  1  1  1  1  1
+     *
+     *   Part 2  ->  [1,1]-[2,2]   [2,4]-[3,4]   [4,0]-[4,0]
+     *
+     * STEP 1 · BRUTE FORCE
+     * For Part 1 only (exactly one rectangle), there's a lovely shortcut: the
+     * first 0 you meet in reading order is the top-left corner, and the last
+     * 0 is the bottom-right corner.
+     *
+     * Brute force cost: O(R × C) time · O(1) space. It breaks as soon as
+     * there are two rectangles, which is exactly what Part 2 adds. Say it,
+     * then move on.
+     */
     // Step 1 · brute force
     public static class OneRectangleSimple {
         // Part 1 only: exactly ONE rectangle of 0s
@@ -1004,6 +1706,27 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA (PARTS 1 AND 2)
+     * Scan row by row, left to right. The first 0 you meet that isn't part of
+     * a rectangle you've already found must be a top-left corner. From there,
+     * walk right while the cells are 0 to find the right edge, and walk down
+     * while the cells are 0 to find the bottom edge. Mark every cell of that
+     * rectangle as used so you don't start again from inside it.
+     *
+     * Part 1 is the same code: just return the first rectangle.
+     *
+     * DRY RUN
+     *   (1,1) first unused 0 -> right: (1,2)=0, (1,3)=1 stop -> right = 2
+     *                           down:  (2,1)=0, (3,1)=1 stop -> bottom = 2
+     *                           ->  [1,1,2,2], mark 4 cells
+     *   (2,4) next unused 0  -> right: (2,5)=1 -> right = 4
+     *                           down:  (3,4)=0, (4,4)=1 -> bottom = 3
+     *                           ->  [2,4,3,4]
+     *   (4,0) next unused 0  -> a 1x1 rectangle  ->  [4,0,4,0]
+     *
+     * PARTS 1 AND 2
+     */
     // Step 2 · the better way
     public static class FindRectangles {
         // Each rectangle of 0s -> {topRow, leftCol, bottomRow, rightCol}
@@ -1038,6 +1761,9 @@ public final class GridsMedium {
         }
     }
 
+    /**
+     * PART 3 (ANY SHAPE = NUMBER OF ISLANDS THAT COLLECTS CELLS)
+     */
     // Step 2 · the better way
     public static class FindShapes {
         // Part 3: shapes of 0s can be any form. Return each shape's cells.
@@ -1068,5 +1794,16 @@ public final class GridsMedium {
             collect(g, r, c - 1, seen, cells);
         }
     }
+
+    /*
+     * Time: O(rows × cols) for every part · Space: O(rows × cols)
+     *
+     * WATCH OUT
+     * - Test a 1×1 rectangle and a rectangle touching the edge of the image
+     *   (the [4,0] case).
+     * - Ask which output format they want: [top, left, bottom, right], two
+     *   coordinate pairs, or [row, col, width, height]. It's a small change,
+     *   but get it right.
+     */
 
 }

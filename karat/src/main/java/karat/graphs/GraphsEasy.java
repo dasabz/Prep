@@ -19,6 +19,22 @@ public final class GraphsEasy {
     // Trick: out = 0 and in = n − 1  ·  O(n + t)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * People are numbered 1 to n. [a, b] means a trusts b. The judge trusts
+     * nobody, and everybody else trusts the judge. Return the judge's number,
+     * or −1 if there's no judge.
+     *
+     * EXAMPLE
+     *   n = 4, trust = [[1,2], [3,2], [4,2], [1,3]]   ->  2
+     *   person 2 trusts nobody and is trusted by 1, 3 and 4 (= n - 1 people)
+     *
+     * STEP 1 · BRUTE FORCE
+     * For each person, scan every trust pair to see whether they trust anyone
+     * and how many people trust them.
+     *
+     * Brute force cost: O(n × t) time · O(1) space
+     */
     // Step 1 · brute force
     public static class TownJudgeBrute {
         public int findJudge(int n, int[][] trust) {
@@ -35,6 +51,19 @@ public final class GraphsEasy {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * This is pure degree counting. Keep two arrays: trustsOthers[p] for
+     * arrows going out, and trustedBy[p] for arrows coming in. The judge is
+     * the person with out = 0 and in = n − 1.
+     *
+     * DRY RUN
+     *   person | trusts others (out) | trusted by (in) | judge?
+     *   1 | 2 | 0 | no
+     *   2 | 0 | 3 | yes
+     *   3 | 1 | 1 | no
+     *   4 | 1 | 0 | no
+     */
     // Step 2 · the better way
     public static class TownJudge {
         public int findJudge(int n, int[][] trust) {
@@ -53,12 +82,39 @@ public final class GraphsEasy {
         }
     }
 
+    /*
+     * Time: O(n + t) · Space: O(n)
+     *
+     * WATCH OUT
+     * - People are numbered 1..n, so the arrays need size n + 1.
+     * - n = 1 with no trust pairs: person 1 is the judge, because 0 = n − 1.
+     *
+     * KARAT LINK
+     * Counting arrows into each node is also Part 1 of the Ancestors question
+     * (problem 13 in GraphsMedium).
+     */
+
     // ====================================================================
     // 2. Find Center of Star Graph
     // LeetCode 1791 · Easy
     // Trick: the centre is the node shared by the first two edges  ·  O(1)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * A star graph has one centre node connected to every other node, and no
+     * other edges. Given the edges, return the centre.
+     *
+     * EXAMPLE
+     *   edges = [[4,2], [1,2], [2,3]]   ->  2
+     *
+     * STEP 1 · BRUTE FORCE
+     * Count degrees like Town Judge: the centre is the node that appears in
+     * every edge (degree = number of edges).
+     *
+     * Brute force cost: O(n) time · O(n) space. Correct, and the natural
+     * first answer.
+     */
     // Step 1 · brute force
     public static class StarCenterCount {
         public int findCenter(int[][] edges) {
@@ -74,6 +130,11 @@ public final class GraphsEasy {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * The centre is in every edge, so it must be in the first two. Whichever
+     * node those two edges share is the answer, and you never read the rest.
+     */
     // Step 2 · the better way
     public static class StarCenter {
         public int findCenter(int[][] edges) {
@@ -84,12 +145,40 @@ public final class GraphsEasy {
         }
     }
 
+    /*
+     * Time: O(1) · Space: O(1)
+     *
+     * LESSON
+     * Use the problem's guarantees. "It's definitely a star" is what makes
+     * the O(1) answer valid.
+     */
+
     // ====================================================================
     // 3. Find if Path Exists in Graph
     // LeetCode 1971 · Easy
     // Trick: adjacency list (both ways) + BFS  ·  O(n + e)
     // ====================================================================
 
+    /**
+     * QUESTION
+     * There are n nodes (0..n−1) and some undirected edges. Is there a path
+     * from src to dst?
+     *
+     * EXAMPLE
+     *   n = 6, edges = [[0,1], [1,2], [3,4], [4,5]]
+     *
+     *   0 --- 1 --- 2        3 --- 4 --- 5
+     *
+     *   src 0, dst 2  ->  true          src 0, dst 5  ->  false
+     *
+     * STEP 1 · BRUTE FORCE
+     * No adjacency list: start with src marked as reached, then keep sweeping
+     * all the edges. Whenever an edge has one end reached and the other not,
+     * mark both. Stop when a whole sweep changes nothing.
+     *
+     * Brute force cost: O(n × e) time in the worst case (up to n sweeps).
+     * Step 2 visits each node and edge once.
+     */
     // Step 1 · brute force
     public static class PathExistsBrute {
         public boolean validPath(int n, int[][] edges, int src, int dst) {
@@ -110,6 +199,17 @@ public final class GraphsEasy {
         }
     }
 
+    /**
+     * STEP 2 · THE BETTER IDEA
+     * Build an adjacency list (node → its neighbours), then BFS from src. If
+     * you ever pop dst, return true. The visited array stops you going round
+     * in circles.
+     *
+     * DRY RUN (SRC 0, DST 2)
+     *   queue [0]   pop 0 -> neighbours 1        -> queue [1]
+     *               pop 1 -> neighbours 0 (seen), 2 -> queue [2]
+     *               pop 2 -> it's dst           -> true
+     */
     // Step 2 · the better way
     public static class PathExists {
         public boolean validPath(int n, int[][] edges, int src, int dst) {
@@ -138,5 +238,15 @@ public final class GraphsEasy {
             return false;
         }
     }
+
+    /*
+     * Time: O(n + e) · Space: O(n + e)
+     *
+     * WATCH OUT
+     * - Undirected means you add both directions.
+     * - Mark nodes visited when you add them to the queue.
+     * - When src == dst, the first node you pop is already dst, so the answer
+     *   is true.
+     */
 
 }
